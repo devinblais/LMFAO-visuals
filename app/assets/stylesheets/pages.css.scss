@@ -5,3 +5,130 @@
 body {
   background:#000;
 }
+
+#timeLeft {
+  background:transparent url(/assets/PowerHour.png) no-repeat center top;
+  position:fixed;
+  bottom:0;
+  right:0;
+  height:250px;
+  width:336px;
+  font-family: 'Chango', 'Helvetica', 'Verdana', 'sans-serif';
+  color:#ffef38;
+  span {
+    font-size:50px;
+    display:block;
+    position:absolute;
+    bottom:0;
+    text-align:left;
+  }
+}
+
+
+
+#canvas {
+  position:absolute;
+  z-index:1;
+}
+
+/* width/height = 1.7 */
+video.mask1 {
+  -webkit-mask-box-image:url(mask1.svg)
+}
+
+/* width/height = 2.2 */
+video.mask2{
+  -webkit-mask-box-image:url(mask2.svg)
+}
+
+div.space {
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:0;
+}
+
+#PowerHour {
+  text-align:center;
+  background:transparent url(/assets/argyle.png) repeat left top;
+  color:#000;
+  z-index:99;
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
+}
+
+#PHheader {
+  position:relative;
+  z-index:10;
+  margin:0 auto;
+  width:753px;
+  height:301px;
+  background:transparent url(/assets/PowerHourHead.png) no-repeat center top;
+}
+#phContent {
+  position:absolute;
+  z-index:9;
+  top:50px;
+  left:0;
+  right:0;
+}
+
+#drinkBitch {
+  position:absolute;
+  z-index:9999;
+  top:220px;
+  left:50px;
+  height:263px;
+  width:577px;
+  background:transparent url(/assets/drinkBitch.png) no-repeat center center;
+}
+
+#counter {
+  z-index:101;
+  position:fixed;
+  bottom:0px;
+  right:30%;
+
+  .one {
+    background-position:center 0;
+  }
+  .two {
+    background-position:center -200px;
+  }
+  .three {
+    background-position:center -400px;
+  }
+  .four {
+    background-position:center -600px;
+  }
+  .five {
+    background-position:center -800px;
+  }
+  .six {
+    background-position:center -1000px;
+  }
+  .seven {
+    background-position:center -1200px;
+  }
+  .eight {
+    background-position:center -1400px;
+  }
+  .nine {
+    background-position:center -1600px;
+  }
+  .ten {
+    background-position:center -1800px;
+  }
+  div {
+    background:transparent url(/assets/counter.png) no-repeat center top;
+    height:200px;
+    width:600px;
+
+  }
+}
+

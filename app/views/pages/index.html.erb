@@ -1,235 +1,334 @@
-	<video id="video" autoplay style="display:none" src="/assets/media/SexyandIKnowIt.m4v">
-		</video> 
+<div style="position:absolute;top:0;left:0;background:#efefef;z-index:99999;height:200px;">
+  <a href="/ph" >Show Power Hour </a><br />
+  <a href="/" >Show Video</a>
+</div>
+<video id="video" autoplay style="display:none" src="/assets/media/SexyandIKnowIt.m4v"></video> 
+<div id="timeLeft">
+  <span></span>
+</div>
 <script type="text/javascript">
+
+  $(function() {
+      (function updateTime() {
+       var time = new Date(),
+       mLeft = 60 - time.getMinutes(),
+       sLeft = 60 - time.getSeconds(),
+       milliLeft = 1000 - time.getMilliseconds();
+       $("#timeLeft span").text(mLeft+":"+sLeft+"."+milliLeft);
+       setTimeout(updateTime, 10);
+       })()
+      })
+
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
-			var container;
+var container;
 
-			var camera, scene, renderer;
+var camera, scene, renderer;
 
-			var video, texture, material, mesh;
+var video, texture, material, mesh;
 
-			var composer;
+var composer;
 
-			var mouseX = 0;
-			var mouseY = 0;
+var mouseX = 0;
+var mouseY = 0;
+var mouseDest = {dx:5, dy:5, x:0, y:0, done:true}
 
-			var windowHalfX = window.innerWidth / 2;
-			var windowHalfY = window.innerHeight / 2;
+var windowHalfX = window.innerWidth / 2;
+var windowHalfY = window.innerHeight / 2;
 
-			var cube_count,
+var particleSystem,
+  particleCount = 1000,
+  particles = new THREE.Geometry();
 
-				meshes = [],
-				materials = [],
+var cube_count,
 
-				xgrid = 20,
-				ygrid = 20;
+    meshes = [],
+    materials = [],
 
-			init();
-			animate();
+    xgrid = 20,
+    ygrid = 20;
 
-			function init() {
+init();
+animate();
 
-				container = document.createElement( 'div' );
-				document.body.appendChild( container );
+function init() {
 
-				scene = new THREE.Scene();
+  container = document.createElement( 'div' );
+  document.body.appendChild( container );
 
-				camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 10000 );
-				camera.position.z = 500;
-				scene.add( camera );
+  scene = new THREE.Scene();
 
-				var light = new THREE.DirectionalLight( 0xffffff );
-				light.position.set( 0.5, 1, 1 ).normalize();
-				scene.add( light );
+  camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 10000 );
+  camera.position.z = 500;
+  scene.add( camera );
 
-				renderer = new THREE.WebGLRenderer( { antialias: false } );
-				renderer.setSize( window.innerWidth, window.innerHeight );
+  var light = new THREE.DirectionalLight( 0xffffff );
+  light.position.set( 0.5, 1, 1 ).normalize();
+  scene.add( light );
 
-				container.appendChild( renderer.domElement );
+  // Particles!
+  // create the particle variables
+      // create the particle variables
+  var pMaterial =
+  new THREE.ParticleBasicMaterial({
+    color: 0xFFFFFF,
+    size: 50,
+    map: THREE.ImageUtils.loadTexture(
+      "assets/particle.png"
+    ),
+    blending: THREE.AdditiveBlending,
+    transparent: true
+  });
 
-				video = document.getElementById( 'video' );
 
-				texture = new THREE.Texture( video );
-				texture.minFilter = THREE.LinearFilter;
-				texture.magFilter = THREE.LinearFilter;
-				texture.format = THREE.RGBFormat;
+// now create the individual particles
+for(var p = 0; p < particleCount; p++) {
 
-				var i, j, ux, uy, ox, oy,
-					geometry,
-					xsize, ysize;
+  // create a particle with random
+  // position values, -250 -> 250
+  var pX = Math.random() * 1000 - 500,
+      pY = Math.random() * 500 - 250,
+      pZ = Math.random() * 500 - 250,
+      particle = new THREE.Vertex(
+          new THREE.Vector3(pX, pY, pZ)
+          );
 
-				ux = 1 / xgrid;
-				uy = 1 / ygrid;
+  // Apply random (negative) y velocity to particles so they appear to be falling
+  particle.velocity = new THREE.Vector3(0,-Math.random(),0);
 
-				xsize = 480 / xgrid;
-				ysize = 204 / ygrid;
+  // add it to the geometry
+  particles.vertices.push(particle);
+}
 
-				var parameters = { color: 0xffffff, map: texture },
-					material_base = new THREE.MeshLambertMaterial( parameters );
+// create the particle system
+particleSystem =
+new THREE.ParticleSystem(
+    particles,
+    pMaterial);
 
-				renderer.initMaterial( material_base, scene.__lights, scene.fog );
+// also update the particle system to
+// sort the particles which enables
+// the behaviour we want
+particleSystem.sortParticles = true;
 
-				cube_count = 0;
+// add it to the scene
+scene.add(particleSystem);
 
-				for ( i = 0; i < xgrid; i ++ )
-				for ( j = 0; j < ygrid; j ++ ) {
+// END particles!
 
-					ox = i;
-					oy = j;
 
-					geometry = new THREE.CubeGeometry( xsize, ysize, xsize );
-					change_uvs( geometry, ux, uy, ox, oy );
+renderer = new THREE.WebGLRenderer( { antialias: false } );
+renderer.setSize( window.innerWidth, window.innerHeight );
 
-					materials[ cube_count ] = new THREE.MeshLambertMaterial( parameters );
+container.appendChild( renderer.domElement );
 
-					material = materials[ cube_count ];
+video = document.getElementById( 'video' );
 
-					material.hue = i/xgrid;
-					material.saturation = j/ygrid;
+texture = new THREE.Texture( video );
+texture.minFilter = THREE.LinearFilter;
+texture.magFilter = THREE.LinearFilter;
+texture.format = THREE.RGBFormat;
 
-					material.color.setHSV( material.hue, material.saturation, 1 );
+var i, j, ux, uy, ox, oy,
+    geometry,
+    xsize, ysize;
 
-					mesh = new THREE.Mesh( geometry, material );
+ux = 1 / xgrid;
+uy = 1 / ygrid;
 
-					mesh.position.x =   ( i - xgrid/2 ) * xsize;
-					mesh.position.y = - ( j - ygrid/2 ) * ysize;
-					mesh.position.z = 0;
+xsize = 480 / xgrid;
+ysize = 204 / ygrid;
 
-					mesh.scale.x = mesh.scale.y = mesh.scale.z = 1;
+var parameters = { color: 0xffffff, map: texture },
+    material_base = new THREE.MeshLambertMaterial( parameters );
 
-					scene.add(mesh);
+renderer.initMaterial( material_base, scene.__lights, scene.fog );
 
-					mesh.dx = 0.001 * ( 0.5 - Math.random() );
-					mesh.dy = 0.001 * ( 0.5 - Math.random() );
+cube_count = 0;
 
-					meshes[ cube_count ] = mesh;
+for ( i = 0; i < xgrid; i ++ )
+for ( j = 0; j < ygrid; j ++ ) {
 
-					cube_count += 1;
+  ox = i;
+  oy = j;
 
-				}
+  geometry = new THREE.CubeGeometry( xsize, ysize, xsize );
+  change_uvs( geometry, ux, uy, ox, oy );
 
-				renderer.autoClear = false;
+  materials[ cube_count ] = new THREE.MeshLambertMaterial( parameters );
 
-				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+  material = materials[ cube_count ];
 
-				// postprocessing
+  mesh = new THREE.Mesh( geometry, material );
 
-				var renderModel = new THREE.RenderPass( scene, camera );
-				var effectBloom = new THREE.BloomPass( 1.3 );
-				var effectScreen = new THREE.ShaderPass( THREE.ShaderExtras[ "screen" ] );
+  mesh.position.x =   ( i - xgrid/2 ) * xsize;
+  mesh.position.y = - ( j - ygrid/2 ) * ysize;
+  mesh.position.z = 0;
 
-				effectScreen.renderToScreen = true;
+  mesh.scale.x = mesh.scale.y = mesh.scale.z = 1;
 
-				composer = new THREE.EffectComposer( renderer );
+  scene.add(mesh);
 
-				composer.addPass( renderModel );
-				composer.addPass( effectBloom );
-				composer.addPass( effectScreen );
+  mesh.dx = 0.001 * ( 0.5 - Math.random() );
+  mesh.dy = 0.001 * ( 0.5 - Math.random() );
 
-			}
+  meshes[ cube_count ] = mesh;
 
-			function change_uvs( geometry, unitx, unity, offsetx, offsety ) {
+  cube_count += 1;
 
-				var i, j, uv;
+}
 
-				for ( i = 0; i < geometry.faceVertexUvs[ 0 ].length; i++ ) {
+renderer.autoClear = false;
 
-					uv = geometry.faceVertexUvs[ 0 ][ i ];
+// postprocessing
 
-					for ( j = 0; j < uv.length; j++ ) {
+var renderModel = new THREE.RenderPass( scene, camera );
+var effectBloom = new THREE.BloomPass( 1.3 );
+var effectScreen = new THREE.ShaderPass( THREE.ShaderExtras[ "screen" ] );
 
-						uv[j].u = ( uv[j].u + offsetx ) * unitx;
-						uv[j].v = ( uv[j].v + offsety ) * unity;
+effectScreen.renderToScreen = true;
 
-					}
+composer = new THREE.EffectComposer( renderer );
 
-				}
+composer.addPass( renderModel );
+composer.addPass( effectBloom );
+composer.addPass( effectScreen );
 
-			}
+}
 
+function change_uvs( geometry, unitx, unity, offsetx, offsety ) {
 
-			function onDocumentMouseMove(event) {
+  var i, j, uv;
 
-				mouseX = ( event.clientX - windowHalfX );
-				mouseY = ( event.clientY - windowHalfY ) * 0.3;
+  for ( i = 0; i < geometry.faceVertexUvs[ 0 ].length; i++ ) {
 
-			}
+    uv = geometry.faceVertexUvs[ 0 ][ i ];
 
-			//
+    for ( j = 0; j < uv.length; j++ ) {
 
-			function animate() {
+      uv[j].u = ( uv[j].u + offsetx ) * unitx;
+      uv[j].v = ( uv[j].v + offsety ) * unity;
 
-				requestAnimationFrame( animate );
+    }
 
-				render();
+  }
 
-			}
+}
 
-			var h, counter = 1;
 
-			function render() {
+function randomMouseMove() {
+  if(mouseDest.done) {
+    mouseDest.x = windowHalfX/2*-1 + Math.floor(Math.random() * windowHalfX);
+    mouseDest.y = windowHalfY/2*-1 + Math.floor(Math.random() * windowHalfY);
+    mouseDest.done = false;
 
-				var time = Date.now() * 0.00005;
+    var xdist = mouseDest.x - mouseX;
+    var ydist = mouseDest.y - mouseY;
+    mouseDest.dx = xdist/50;
+    mouseDest.dy = ydist/50;
+  } 
 
-				camera.position.x += ( mouseX - camera.position.x ) * 0.05;
-				camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
+  mouseX += mouseDest.dx;
+  mouseY += mouseDest.dy;
 
-				camera.lookAt( scene.position );
+  var xdist = Math.abs(mouseX - mouseDest.x);
+  var ydist = Math.abs(mouseY - mouseDest.y);
+  if(xdist < 5 && ydist < 5) {
+    mouseDest.done = true;
+  }
 
-				if ( video.readyState === video.HAVE_ENOUGH_DATA ) {
+}
 
-					if ( texture ) texture.needsUpdate = true;
+//
 
-				}
+function animate() {
 
-				for( i = 0; i < cube_count; i++ ) {
+  requestAnimationFrame( animate );
 
-					material = materials[i];
+  render();
 
-					h = ( 360 * ( material.hue + time ) % 360 ) / 360;
-					material.color.setHSV( h, material.saturation, 1 );
+}
 
-				}
+var h, counter = 1;
 
-				if( counter % 1000  > 200 ) {
+function render() {
+  randomMouseMove()
 
-					for( i = 0; i < cube_count; i++ ) {
+  var time = Date.now() * 0.00005;
 
-						mesh = meshes[i];
+  camera.position.x += ( mouseX - camera.position.x ) * 0.05;
+  camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
 
-						mesh.rotation.x += 10 * mesh.dx;
-						mesh.rotation.y += 10 * mesh.dy;
+  camera.lookAt( scene.position );
 
-						mesh.position.x += 200 * mesh.dx;
-						mesh.position.y += 200 * mesh.dy;
-						mesh.position.z += 400 * mesh.dx;
+  if ( video.readyState === video.HAVE_ENOUGH_DATA ) {
 
-					}
+    if ( texture ) texture.needsUpdate = true;
 
-				}
+  }
 
-				if( counter % 1000  == 0 ) {
+  //particles!
+  particleSystem.rotation.y += 0.01;
 
-					for( i = 0; i < cube_count; i++ ) {
+    var pCount = particleCount;
+    while(pCount--) {
+      var particle = particles.vertices[pCount];
 
-						mesh = meshes[i];
+      // Reset particles that fall too low
+      if(particle.position.y < -200) {
+        particle.position.y = 200;
+        particle.velocity.y = 0;
+      }
 
-						mesh.dx *= -1;
-						mesh.dy *= -1;
+      particle.velocity.y -= Math.random() *.1;
 
-					}
+      particle.position.addSelf(particle.velocity);
+    }
+    particleSystem.geometry.__dirtyVertices = true;
 
-				}
+  // END particles
 
-				counter ++;
 
-				renderer.clear();
-				composer.render();
+  for( i = 0; i < cube_count; i++ ) {
 
+    material = materials[i];
 
-			}
+    h = ( 360 * ( material.hue + time ) % 360 ) / 360;
+    material.color.setHSV( h, material.saturation, 1 );
 
+  }
 
+  if( counter % 500  > 200 ) {
+
+    for( i = 0; i < cube_count; i++ ) {
+
+      mesh = meshes[i];
+
+      mesh.position.z += 100 * mesh.dx;
+
+    }
+
+  }
+
+  if( counter % 500  == 0 ) {
+
+    for( i = 0; i < cube_count; i++ ) {
+
+      mesh = meshes[i];
+
+      mesh.dx *= -1;
+      mesh.dy *= -1;
+
+    }
+
+  }
+
+  counter ++;
+
+  renderer.clear();
+  composer.render();
+
+
+}
 </script>
 

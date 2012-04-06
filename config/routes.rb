@@ -1,5 +1,6 @@
 LMFAOParty::Application.routes.draw do
    root :to => 'pages#index'
+   match '/ph' => 'pages#powerHour'
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

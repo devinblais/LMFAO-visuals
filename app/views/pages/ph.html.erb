@@ -1,0 +1,118 @@
+<div style="position:absolute;top:0;left:0;background:#efefef;z-index:99999;height:200px;">
+  <a href="/ph" >Show Power Hour </a><br />
+  <a href="/" >Show Video</a>
+</div>
+<div id="PowerHour">
+  <div id="PHheader"></div>
+    <h1>Time:<span id="time"></span></h1>
+    <div id="phVid" style="width:700px;height:700px;overflow:hidden;margin:0 auto;position:relative;z-index:100;">
+      <canvas height="700" width="700" id="canvas"></canvas>
+
+      <video id="phVideo" style="margin-left:-200px;margin-top:50px;z-index:1;" src="media/fuckyou.m4v" height="600" width="1100">
+      </video>
+    </div>
+</div>
+
+<script type="text/javascript">
+  Array.prototype.shuffle = function(){ //v1.0
+  for(var j, x, i = this.length; i; j = parseInt(Math.random() * i), x = this[--i], this[i] = this[j], this[j] = x);
+};
+
+var q = [
+  {name:"fuckyou.m4v",mask:1},
+  {name:"Hello.m4v",mask:2},
+  {name:"CrazyBitch.m4v", mask:1}
+]
+
+$(function() {
+  q.shuffle();
+})  
+
+var start;
+function initPowerHour() {
+  start = new Date();
+  updateClock();
+  //Load the first video
+  loadVid();
+}
+
+
+function loadVid() {
+  //Grab the next video
+  var vid = q.shift();
+
+  //Grab a random location in that video > 60 seconds from the end
+  $("#phVideo").attr("src","/assets/media/"+vid.name).removeClass("mask1 mask2").addClass("mask"+vid.mask);
+  var htmlvid = $("#phVideo").get(0);
+  (function vidCheck() {
+    if(htmlvid.readyState > 0) {
+      var d = htmlvid.duration,
+      start = Math.random() * (d-60);
+      htmlvid.currentTime = start;
+      htmlvid.play()
+    } else {
+      setTimeout(vidCheck, 10)
+    }
+  })()
+
+}
+
+function updateClock() {
+  var now = new Date();
+  var diff = (now - start)/1000%60;
+  var arc = diff/60 * Math.PI * 2;
+  $("#time").text(Math.floor(diff));
+  drawPowerHour(arc)
+
+  setTimeout(updateClock, 10);
+}
+
+function drawPowerHour(a) {
+  var canvas = document.getElementById("canvas");
+  var arc = a || 0;
+
+  if (canvas.getContext) {
+    var outsideRadius = 322;
+
+    ctx = canvas.getContext("2d");
+    ctx.clearRect(0,0,700,700);
+
+
+    ctx.strokeStyle = "#84f078";
+    ctx.lineWidth = 50;
+
+    ctx.font = 'bold 30px Helvetica, Arial';
+
+
+    ctx.fillStyle = "#84f078";
+    ctx.beginPath();
+    ctx.arc(350, 350, outsideRadius, 0, arc);
+    ctx.stroke();
+    return;
+    for(var i = 0; i < 100; i++) {
+      var angle = startAngle + i * arc;
+      ctx.fillStyle = colors[(i%2)];
+
+      ctx.beginPath();
+      ctx.arc(500, 500, outsideRadius, angle, angle + arc, false);
+      ctx.arc(500, 500, insideRadius, angle + arc, angle, true);
+      ctx.stroke();
+      ctx.fill();
+
+      ctx.save();
+      ctx.shadowOffsetX = -1;
+      ctx.shadowOffsetY = -1;
+      ctx.shadowBlur    = 0;
+      ctx.shadowColor   = "rgb(220,220,220)";
+      ctx.fillStyle = colors2[(i%2)];
+      ctx.translate(500 + Math.cos(angle + arc / 2) * textRadius, 
+                    500 + Math.sin(angle + arc / 2) * textRadius);
+                    ctx.rotate(angle + arc / 2 + Math.PI / 2);
+                    var text = fuckYou.penalties[i].abrev;
+                    ctx.fillText(text, -ctx.measureText(text).width / 2, 0);
+                    ctx.restore();
+    } 
+
+  }
+}
+</script>
