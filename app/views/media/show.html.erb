@@ -1,0 +1,15 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Name:</b>
+  <%= @medium.name %>
+</p>
+<p>
+  <b>Played:</b>
+  <%= @medium.played %>
+</p>
+<video src="/assets/media/<%= @medium.src %>" autoplay> </video>
+
+
+<%= link_to 'Edit', edit_medium_path(@medium) %> |
+<%= link_to 'Back', media_path %>

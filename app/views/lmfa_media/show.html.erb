@@ -1,0 +1,17 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Name:</b>
+  <%= @lmfa_medium.name %>
+</p>
+
+
+<p>
+  <b>Played:</b>
+  <%= @lmfa_medium.played %>
+</p>
+
+<video src="/assets/lmfaoMedia/<%= @lmfa_medium.src %>" width="800" autoplay> </video>
+
+<%= link_to 'Edit', edit_lmfa_medium_path(@lmfa_medium) %> |
+<%= link_to 'Back', lmfa_media_path %>

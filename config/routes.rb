@@ -1,4 +1,8 @@
 LMFAOParty::Application.routes.draw do
+  resources :lmfa_media
+
+  resources :media
+
    root :to => 'pages#index'
    match '/ph' => 'pages#powerHour'
   # The priority is based upon order of creation:

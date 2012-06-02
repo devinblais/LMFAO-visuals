@@ -13,3 +13,37 @@
 //= require jquery
 //= require jquery_ujs
 //= require_tree .
+//
+
+var Q = [];
+
+
+//Each page needs to define:
+// songType (media || lmfa_media)
+// playSong which changes the src of the video and any other things
+
+function nextSong() {
+  //Check if Q is empty
+  if(!Q.length) {
+    loadSongs()
+    return;
+  }
+  var song = Q.pop();
+  playSong(song);
+
+}
+function loadSongs(){
+  $.ajax({
+    url: "/"+songType+".json",
+    success: function(d) {
+      Q = d; 
+      nextSong();
+    }
+  })
+
+}
+
+$(function() {
+  $("video").bind("ended", nextSong)
+  loadSongs()
+})

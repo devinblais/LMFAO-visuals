@@ -1,7 +1,3 @@
-<div style="position:absolute;top:0;left:0;background:#efefef;z-index:99999;height:200px;">
-  <a href="/ph" >Show Power Hour </a><br />
-  <a href="/" >Show Video</a>
-</div>
 <div id="PowerHour">
   <div id="PHheader"></div>
   <div id="phContent">
@@ -19,47 +15,49 @@
 </div>
 
 <script type="text/javascript">
-  Array.prototype.shuffle = function(){ //v1.0
-  for(var j, x, i = this.length; i; j = parseInt(Math.random() * i), x = this[--i], this[i] = this[j], this[j] = x);
-};
-
-var q = [
-  {name:"fuckyou.m4v",mask:1},
-  {name:"Hello.m4v",mask:2},
-  {name:"CrazyBitch.m4v", mask:1}
-]
-
+var exceptions = {
+  "Hello.m4v": "mask2",
+}
 var nums = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"]
 var count = 0;
-var ready = true;
+var ready = false;
+var songType = "media";
 
 $(function() {
-  q.shuffle();
+  setTimeout(function() { ready = true;}, 30000)
   start = new Date();
   updateClock();
 })  
 
 var start;
-function loadVid() {
+function playSong(song) {
+  if(count == 10) {
+    window.location = "/";
+    return;
+  }
+
   //Show the drink sign! and Fade it out
   $("#drinkBitch").fadeIn("fast");
   setTimeout(function() { $("#drinkBitch").fadeOut("slow")}, 5000)
-
   
   count++;
-  //Grab the next video
-  var vid = q.shift();
 
   //Update the count
   $("#counter div").attr("class",nums[count]);
   //Grab a random location in that video > 60 seconds from the end
-  $("#phVideo").attr("src","/assets/media/"+vid.name).removeClass("mask1 mask2").addClass("mask"+vid.mask);
+  $("#phVideo").attr("src","/assets/media/"+song.src).attr("class","");
+  if(exceptions[song.src]) {
+    $("#phVideo").addClass(exceptions[song.src]);
+  } else {
+    $("#phVideo").addClass("mask1");
+  }
+
   var htmlvid = $("#phVideo").get(0);
   (function vidCheck() {
     if(htmlvid.readyState > 0) {
       var d = htmlvid.duration,
       start = Math.random() * (d-60);
-      htmlvid.currentTime = start;
+      htmlvid.currentTime = 60;
       htmlvid.play()
     } else {
       setTimeout(vidCheck, 10)
@@ -75,7 +73,7 @@ function updateClock() {
   if(ready && Math.round(diff) === 0) {
     ready = false;
     setTimeout(function() { ready = true;}, 30000)
-    loadVid()
+    nextSong()
   }
   drawPowerHour(arc)
 

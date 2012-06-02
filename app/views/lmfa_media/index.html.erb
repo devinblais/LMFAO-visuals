@@ -1,0 +1,27 @@
+<h1>Listing lmfa_media</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Src</th>
+    <th>Played</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @lmfa_media.each do |lmfa_medium| %>
+  <tr>
+    <td><%= lmfa_medium.name %></td>
+    <td><%= lmfa_medium.src %></td>
+    <td><%= lmfa_medium.played %></td>
+    <td><%= link_to 'Show', lmfa_medium %></td>
+    <td><%= link_to 'Edit', edit_lmfa_medium_path(lmfa_medium) %></td>
+    <td><%= link_to 'Destroy', lmfa_medium, confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Lmfa medium', new_lmfa_medium_path %>

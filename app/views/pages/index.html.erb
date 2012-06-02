@@ -1,20 +1,26 @@
-<div style="position:absolute;top:0;left:0;background:#efefef;z-index:99999;height:200px;">
-  <a href="/ph" >Show Power Hour </a><br />
-  <a href="/" >Show Video</a>
-</div>
-<video id="video" autoplay style="display:none" src="/assets/media/SexyandIKnowIt.m4v"></video> 
+<video id="video" autoplay style="display:none" ></video> 
 <div id="timeLeft">
   <span></span>
 </div>
 <script type="text/javascript">
 
+  var songType = 'lmfa_media';
+
+  function playSong(song) {
+    $("video").attr("src",'/assets/lmfaoMedia/'+song.src)
+  }
+
   $(function() {
       (function updateTime() {
        var time = new Date(),
-       mLeft = 60 - time.getMinutes(),
-       sLeft = 60 - time.getSeconds(),
+       mLeft = 59 - time.getMinutes(),
+       sLeft = 59 - time.getSeconds(),
        milliLeft = 1000 - time.getMilliseconds();
        $("#timeLeft span").text(mLeft+":"+sLeft+"."+milliLeft);
+       if(mLeft == 0 && sLeft == 0) {
+         window.location = "/ph";
+        return;
+       }
        setTimeout(updateTime, 10);
        })()
       })
@@ -36,9 +42,10 @@ var mouseDest = {dx:5, dy:5, x:0, y:0, done:true}
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
 
-var particleSystem,
-  particleCount = 1000,
-  particles = new THREE.Geometry();
+var particleSystems = [],
+  particleCount = 50,
+  particleSets = []; 
+  //particles = new THREE.Geometry();
 
 var cube_count,
 
@@ -46,7 +53,7 @@ var cube_count,
     materials = [],
 
     xgrid = 20,
-    ygrid = 20;
+    ygrid = 10;
 
 init();
 animate();
@@ -69,7 +76,9 @@ function init() {
   // Particles!
   // create the particle variables
       // create the particle variables
-  var pMaterial =
+  var pMaterials = [];
+
+  pMaterials.push(
   new THREE.ParticleBasicMaterial({
     color: 0xFFFFFF,
     size: 50,
@@ -78,17 +87,28 @@ function init() {
     ),
     blending: THREE.AdditiveBlending,
     transparent: true
-  });
+  }),
+  new THREE.ParticleBasicMaterial({
+    color: 0xFFFFFF,
+    size: 150,
+    map: THREE.ImageUtils.loadTexture(
+      "assets/particle2.png"
+    ),
+    blending: THREE.AdditiveBlending,
+    transparent: true
+  }))
 
 
+  for(var pm = 0;pm < pMaterials.length;pm++) {
+  particleSets.push(new THREE.Geometry());
+  var particles = particleSets[pm];
 // now create the individual particles
 for(var p = 0; p < particleCount; p++) {
-
   // create a particle with random
   // position values, -250 -> 250
   var pX = Math.random() * 1000 - 500,
-      pY = Math.random() * 500 - 250,
-      pZ = Math.random() * 500 - 250,
+      pY = Math.random() * 1000 - 500,
+      pZ = Math.random() * 1000 - 500,
       particle = new THREE.Vertex(
           new THREE.Vector3(pX, pY, pZ)
           );
@@ -101,19 +121,20 @@ for(var p = 0; p < particleCount; p++) {
 }
 
 // create the particle system
-particleSystem =
+particleSystems.push(
 new THREE.ParticleSystem(
     particles,
-    pMaterial);
+    pMaterials[pm])
+)
 
 // also update the particle system to
 // sort the particles which enables
 // the behaviour we want
-particleSystem.sortParticles = true;
+particleSystems[pm].sortParticles = true;
 
 // add it to the scene
-scene.add(particleSystem);
-
+scene.add(particleSystems[pm]);
+}
 // END particles!
 
 
@@ -169,7 +190,7 @@ for ( j = 0; j < ygrid; j ++ ) {
 
   scene.add(mesh);
 
-  mesh.dx = 0.001 * ( 0.5 - Math.random() );
+  mesh.dx = Math.random() < .5 ? 0.001 * ( 0.5- Math.random() ) : 0;
   mesh.dy = 0.001 * ( 0.5 - Math.random() );
 
   meshes[ cube_count ] = mesh;
@@ -268,9 +289,12 @@ function render() {
   }
 
   //particles!
-  particleSystem.rotation.y += 0.01;
+  for(var pi=0;pi<particleSystems.length;pi++){
+  particleSystems[pi].rotation.y += 0.01;
 
-    var pCount = particleCount;
+  var pCount = particleSets[pi].vertices.length,
+      particles = particleSets[pi];
+
     while(pCount--) {
       var particle = particles.vertices[pCount];
 
@@ -284,9 +308,10 @@ function render() {
 
       particle.position.addSelf(particle.velocity);
     }
-    particleSystem.geometry.__dirtyVertices = true;
+    particleSystems[pi].geometry.__dirtyVertices = true;
 
   // END particles
+  }
 
 
   for( i = 0; i < cube_count; i++ ) {
@@ -298,28 +323,45 @@ function render() {
 
   }
 
-  if( counter % 500  > 200 ) {
+  if(counter % 2000 > 1000) {
+    //Once the pieces are back, reset each dx
+    if (counter % 1000 == 0 ) {
 
-    for( i = 0; i < cube_count; i++ ) {
-
-      mesh = meshes[i];
-
-      mesh.position.z += 100 * mesh.dx;
-
-    }
-
-  }
-
-  if( counter % 500  == 0 ) {
-
-    for( i = 0; i < cube_count; i++ ) {
-
-      mesh = meshes[i];
-
-      mesh.dx *= -1;
-      mesh.dy *= -1;
+      for( i = 0; i < cube_count; i++ ) {
+        mesh = meshes[i];
+        mesh.dx = Math.random() < .5 ? 0.001 * ( 0.5- Math.random() ) : 0;
+      }
 
     }
+
+    if( counter % 500  > 50 ) {
+
+      for( i = 0; i < cube_count; i++ ) {
+
+        mesh = meshes[i];
+
+        mesh.position.y += 100 * mesh.dx;
+        mesh.position.x += 100* mesh.dx;
+        mesh.position.z += 500 * mesh.dx;
+        mesh.rotation.x += 10 * mesh.dx;
+        mesh.rotation.y += 10 * mesh.dx;
+
+      }
+
+    } 
+
+    if( counter % 500  == 0 ) {
+
+      for( i = 0; i < cube_count; i++ ) {
+
+        mesh = meshes[i];
+
+        mesh.dx *= -1;
+        mesh.dy *= -1;
+
+      }
+
+    } 
 
   }
 

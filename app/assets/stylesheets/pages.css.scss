@@ -4,13 +4,15 @@
 
 body {
   background:#000;
+  overflow: hidden;
+  margin: 0;
 }
 
 #timeLeft {
   background:transparent url(/assets/PowerHour.png) no-repeat center top;
   position:fixed;
-  bottom:0;
-  right:0;
+  bottom:50px;
+  right:50px;
   height:250px;
   width:336px;
   font-family: 'Chango', 'Helvetica', 'Verdana', 'sans-serif';
@@ -73,7 +75,7 @@ div.space {
 #phContent {
   position:absolute;
   z-index:9;
-  top:50px;
+  top:175px;
   left:0;
   right:0;
 }

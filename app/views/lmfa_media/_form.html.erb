@@ -1,0 +1,29 @@
+<%= form_for(@lmfa_medium) do |f| %>
+  <% if @lmfa_medium.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@lmfa_medium.errors.count, "error") %> prohibited this lmfa_medium from being saved:</h2>
+
+      <ul>
+      <% @lmfa_medium.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :name %><br />
+    <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :src %><br />
+    <%= f.text_field :src %>
+  </div>
+  <div class="field">
+    <%= f.label :played %><br />
+    <%= f.check_box :played %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
